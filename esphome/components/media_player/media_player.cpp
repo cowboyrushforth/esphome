@@ -67,6 +67,7 @@ void MediaPlayerCall::perform() {
   }
   if (this->volume_.has_value()) {
     ESP_LOGD(TAG, "  Volume: %.2f", this->volume_.value());
+    this->parent_->save_restore_volume_if_needed(this->volume_.value());
   }
   this->parent_->control(*this);
 }
@@ -106,6 +107,22 @@ MediaPlayerCall &MediaPlayerCall::set_media_url(const std::string &media_url) {
 MediaPlayerCall &MediaPlayerCall::set_volume(float volume) {
   this->volume_ = volume;
   return *this;
+}
+
+void MediaPlayer::restore_volume_if_needed() {
+  if (this->restore_volume_) {
+    this->rtc_ = global_preferences->make_preference<float>(this->get_object_id_hash());
+    float target_volume;
+    if (this->rtc_.load(&target_volume))
+      this->make_call().set_volume(target_volume).perform();
+  }
+}
+
+void MediaPlayer::save_restore_volume_if_needed(float volume) {
+  if (this->restore_volume_) {
+    this->rtc_ = global_preferences->make_preference<float>(this->get_object_id_hash());
+    this->rtc_.save(&volume);
+  }
 }
 
 void MediaPlayer::add_on_state_callback(std::function<void()> &&callback) {

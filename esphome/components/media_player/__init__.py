@@ -47,6 +47,7 @@ CONF_ON_IDLE = "on_idle"
 CONF_ON_PLAY = "on_play"
 CONF_ON_PAUSE = "on_pause"
 CONF_MEDIA_URL = "media_url"
+CONF_RESTORE_VOLUME = "restore_volume"
 
 StateTrigger = media_player_ns.class_("StateTrigger", automation.Trigger.template())
 IdleTrigger = media_player_ns.class_("IdleTrigger", automation.Trigger.template())
@@ -75,6 +76,7 @@ async def setup_media_player_core_(var, config):
 async def register_media_player(var, config):
     if not CORE.has_id(config[CONF_ID]):
         var = cg.Pvariable(config[CONF_ID], var)
+    cg.add(var.set_restore_volume(config[CONF_RESTORE_VOLUME]))
     cg.add(cg.App.register_media_player(var))
     await setup_media_player_core_(var, config)
 
@@ -101,6 +103,7 @@ MEDIA_PLAYER_SCHEMA = cv.ENTITY_BASE_SCHEMA.extend(
                 cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(PauseTrigger),
             }
         ),
+        cv.Optional(CONF_RESTORE_VOLUME, default=False): cv.boolean,
     }
 )
 

@@ -2,6 +2,7 @@
 
 #include "esphome/core/entity_base.h"
 #include "esphome/core/helpers.h"
+#include "esphome/core/preferences.h"
 
 namespace esphome {
 namespace media_player {
@@ -81,12 +82,20 @@ class MediaPlayer : public EntityBase {
 
   virtual MediaPlayerTraits get_traits() = 0;
 
+  void set_restore_volume(bool restore_volume){ this->restore_volume_ = restore_volume; }
+
  protected:
   friend MediaPlayerCall;
 
   virtual void control(const MediaPlayerCall &call) = 0;
 
   CallbackManager<void()> state_callback_{};
+
+  bool restore_volume_{false};
+  ESPPreferenceObject rtc_;
+  void save_restore_volume_if_needed(float volume);
+  void restore_volume_if_needed();
+
 };
 
 }  // namespace media_player
